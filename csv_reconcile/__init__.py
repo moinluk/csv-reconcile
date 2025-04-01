@@ -58,7 +58,7 @@ def convert_urls_to_links(text):
     url_pattern = r'(https?://[^\s<>"\']+)'  # Der Ausdruck schließt nun unerwünschte Zeichen wie Leerzeichen und '>' aus
     
     # Ersetze jede URL durch einen HTML-Link
-    result = re.sub(url_pattern, r'<a href="\1">\1</a>', text)
+    result = re.sub(url_pattern, r'<a target="_blank" href="\1">\1</a>', text)
     
     return result
 
@@ -201,7 +201,7 @@ def create_app(config=None, instance_path=None, scorerOption=None):
         entity = getEntity(entity_id)
         if not entity:
             abort(404)
-        entity_html = convert_urls_to_links("".join([f"<dt>{escape(key)}</dt><dd>{escape(val)}</dd><br/>"
+        entity_html = convert_urls_to_links("".join([f"<dt>{escape(key)}</dt><dd>{escape(val)}</dd>"
                                for key, val in entity.items()]))
         return f"""<!DOCTYPE html>
 <html>
@@ -210,12 +210,8 @@ def create_app(config=None, instance_path=None, scorerOption=None):
         <title>Preview for {escape(entity_id)}</title>
         <style type='text/css'>
           h1 {{font-size: 115%; }}
-          dl {{display: flex; flex-flow: row wrap;}}
-          dt {{flex-basis: 20%; padding: 2px 4px;
-               text-align: right; font-weight: bold;}}
+          dt {{font-weight: bold;}}
           dt::after {{content: ':';}}
-          dd {{flex-basis: 70%; flex-grow: 1;
-               margin: 0; padding: 2px 4px;}}
         </style>
     </head>
     <body>
