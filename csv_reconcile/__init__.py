@@ -5,6 +5,7 @@ import sys
 import time
 import shutil
 from contextlib import contextmanager
+import re
 
 import click
 from flask import abort, Flask, jsonify, request
@@ -51,6 +52,16 @@ MANIFEST = {
         }
     }
 }
+
+def convert_urls_to_links(text):
+    # Regulärer Ausdruck zur Erkennung von URLs
+    url_pattern = r'(https?://[^\s<>"\']+)'  # Der Ausdruck schließt nun unerwünschte Zeichen wie Leerzeichen und '>' aus
+    
+    # Ersetze jede URL durch einen HTML-Link
+    result = re.sub(url_pattern, r'<a href="\1">\1</a>', text)
+    
+    return result
+
 
 
 def create_app(config=None, instance_path=None, scorerOption=None):
@@ -181,6 +192,7 @@ def create_app(config=None, instance_path=None, scorerOption=None):
 
         # unprocessible request
 
+
     @app.route('/preview/<entity_id>')
     @cross_origin()
     def preview_service(entity_id=None):
@@ -189,8 +201,8 @@ def create_app(config=None, instance_path=None, scorerOption=None):
         entity = getEntity(entity_id)
         if not entity:
             abort(404)
-        entity_html = "".join([f"<dt>{escape(key)}</dt><dd>{escape(val)}</dd>"
-                               for key, val in entity.items()])
+        entity_html = convert_urls_to_links("".join([f"<dt>{escape(key)}</dt><dd>{escape(val)}</dd><br/>"
+                               for key, val in entity.items()]))
         return f"""<!DOCTYPE html>
 <html>
     <head>
